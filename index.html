@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>Just One — card dealer</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#f7f5ef">
+<meta name="description" content="An endless card deck for the party game Just One. Deals five numbered words, tap the one the guesser called.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Just One">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="lib/gk-base.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
+</head>
+<body>
+
+<!-- The card -->
+<div class="screen active" id="screen-card">
+  <header class="bar">
+    <button class="icon-btn" onclick="App.showSettings()" aria-label="Settings">⚙️</button>
+    <div class="deck-info">
+      <span class="wordmark">JUST ONE</span>
+      <span class="counter" id="counter">card 1</span>
+    </div>
+    <button class="icon-btn" onclick="App.showRules()" aria-label="How to play">❓</button>
+  </header>
+
+  <div class="card-stage">
+    <div class="card" id="card"></div>
+    <p class="spotlight-hint" id="hint">Tap the number the guesser called</p>
+  </div>
+
+  <div class="deal-row">
+    <button class="icon-btn nav" id="btn-back" onclick="App.back()" aria-label="Previous card">‹</button>
+    <button class="btn deal" id="btn-deal" onclick="App.deal()">Next card</button>
+    <button class="icon-btn nav" id="btn-forward" onclick="App.forward()" aria-label="Next card in history">›</button>
+  </div>
+
+  <div class="dark-strip" id="dark-strip" style="display:none">After dark</div>
+</div>
+
+<!-- Settings -->
+<div class="screen" id="screen-settings">
+  <header class="bar">
+    <button class="icon-btn" onclick="App.showCard()" aria-label="Back to the card">←</button>
+    <h2>Settings</h2>
+    <span class="icon-btn ghost-space" aria-hidden="true"></span>
+  </header>
+
+  <div class="settings-list">
+    <div class="setting">
+      <div class="setting-text">
+        <div class="setting-label">After dark</div>
+        <p class="setting-sub">Rude words instead of the family-friendly bank. Always off when the app opens.</p>
+      </div>
+      <button class="toggle" id="tog-nsfw" role="switch" aria-checked="false" onclick="App.toggleNsfw()"><span class="knob"></span></button>
+    </div>
+
+    <div class="setting">
+      <div class="setting-text">
+        <div class="setting-label">Spotlight the chosen word</div>
+        <p class="setting-sub">Tapping a number enlarges that word and fades the other four.</p>
+      </div>
+      <button class="toggle" id="tog-spotlight" role="switch" aria-checked="true" onclick="App.toggleSetting('spotlight')"><span class="knob"></span></button>
+    </div>
+
+    <div class="setting">
+      <div class="setting-text">
+        <div class="setting-label">Big text</div>
+        <p class="setting-sub">For reading across a wide table.</p>
+      </div>
+      <button class="toggle" id="tog-bigtext" role="switch" aria-checked="false" onclick="App.toggleSetting('bigText')"><span class="knob"></span></button>
+    </div>
+
+    <div class="setting">
+      <div class="setting-text">
+        <div class="setting-label">Sound</div>
+        <p class="setting-sub">A soft click when a card is dealt.</p>
+      </div>
+      <button class="toggle" id="tog-sound" role="switch" aria-checked="true" onclick="App.toggleSetting('sound')"><span class="knob"></span></button>
+    </div>
+
+    <button class="btn ghost wide" id="btn-install" style="display:none">Add to home screen</button>
+
+    <p class="foot-note" id="bank-note"></p>
+  </div>
+</div>
+
+<!-- How to play -->
+<div class="screen" id="screen-rules">
+  <header class="bar">
+    <button class="icon-btn" onclick="App.showCard()" aria-label="Back to the card">←</button>
+    <h2>How to play</h2>
+    <span class="icon-btn ghost-space" aria-hidden="true"></span>
+  </header>
+
+  <div class="rules">
+    <p class="rules-intro">Just One is co-operative. Everyone wins or nobody does.</p>
+    <ol class="rules-steps">
+      <li>One player is the <b>guesser</b>. They must not see the card.</li>
+      <li>The guesser calls out a number from <b>1 to 5</b>. Tap it here.</li>
+      <li>Everyone else secretly writes <b>one single word</b> as a clue.</li>
+      <li>Compare the clues. <b>Any clue written by two or more people is wiped out</b> — that is the whole game. So is anything that breaks the rules: the mystery word itself, a made-up word, or a different form of the word.</li>
+      <li>Show the guesser what survives. They get <b>one guess</b>.</li>
+      <li>Right: keep the card. Wrong: discard it <b>and</b> remove the next card from the deck. Passing costs the card only.</li>
+    </ol>
+    <p class="rules-note">Play 13 cards and score out of 13. This app just deals the cards — keep score however you already do.</p>
+    <p class="rules-credit">Just One is designed by Ludovic Roudy and Bruno Sautter, published by Repos Production. This is an unofficial helper, not affiliated with them.</p>
+  </div>
+</div>
+
+<!-- After-dark confirmation -->
+<div class="modal" id="modal-nsfw">
+  <div class="modal-box">
+    <h3>After dark</h3>
+    <p>The deck switches to rude words — sex, swearing, the lot. Adults only.</p>
+    <p class="modal-sub">It turns itself back off next time the app opens.</p>
+    <button class="btn dark wide" onclick="App.confirmNsfw()">Turn it on</button>
+    <button class="btn ghost wide" onclick="GK.UI.closeModal('modal-nsfw')">Cancel</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="lib/gk-util.js"></script>
+<script src="lib/gk-audio.js"></script>
+<script src="lib/gk-ui.js"></script>
+<script src="lib/gk-pwa.js"></script>
+<script src="js/words-sfw.js"></script>
+<script src="js/words-nsfw.js"></script>
+<script src="js/deck.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

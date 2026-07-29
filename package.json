@@ -1,0 +1,9 @@
+{
+  "name": "just-one",
+  "version": "1.0.0",
+  "private": true,
+  "description": "An endless card deck for the party game Just One, with an after-dark word bank. Built on gamekit.",
+  "scripts": {
+    "test": "node --test"
+  }
+}
