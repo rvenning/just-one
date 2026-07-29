@@ -209,22 +209,30 @@ body {
 }
 .icon-btn.nav { font-size: 30px; font-weight: 700; }
 
+/* The label is --paper, never #fff: this button is filled with --ink, and both
+   flip with the theme. Hardcoding white put white text on the cream after-dark
+   button. gk-base.css also gives .btn a chunky gold `0 6px 0` drop shadow that
+   belongs to the games, not to a paper card — killed here and on :active. */
 .btn {
   border: 0;
   border-radius: 12px;
   padding: 15px 22px;
+  margin: 0;
   font: inherit;
   font-size: 17px;
   font-weight: 700;
-  color: #fff;
+  color: var(--paper);
   background: var(--ink);
+  box-shadow: none;
   cursor: pointer;
 }
-.btn:active { transform: scale(.98); }
+.btn:active { transform: scale(.98); box-shadow: none; }
 .btn.deal { flex: 1; max-width: 320px; }
 .btn.wide { display: block; width: 100%; margin-top: 10px; }
 .btn.ghost { background: none; color: var(--ink-soft); border: 1px solid var(--hair); }
-.btn.dark { background: var(--n3); }
+/* A deeper pink than --n3 so white text clears 4.5:1. --n3 itself has to stay
+   as it is — it's the colour of the number 3 on every card. */
+.btn.dark { background: #b82a4f; color: #fff; }
 
 .dark-strip {
   flex: none;
