@@ -1,5 +1,22 @@
 // Just One companion · wiring.
 
+// The kit's default click is a 50ms sine at volume 0.1 — inaudible over a
+// table of people on a phone speaker. Two sounds of our own, still quiet
+// enough not to become annoying over thirteen rounds.
+Object.assign(GK.Sfx, {
+  // A card flicked off the deck: a brush of noise plus a low woody tap.
+  dealCard() {
+    this.noise({ dur: 0.08, vol: 0.06 });
+    this.tone({ freq: 300, type: "triangle", dur: 0.08, vol: 0.16 });
+    this.tone({ freq: 460, type: "sine", dur: 0.1, vol: 0.1, when: 0.04 });
+  },
+  // The spotlight landing on a word — brighter, and it resolves upward.
+  spot() {
+    this.tone({ freq: 620, type: "sine", dur: 0.06, vol: 0.13 });
+    this.tone({ freq: 930, type: "sine", dur: 0.1, vol: 0.09, when: 0.05 });
+  },
+});
+
 const App = {
   deck: null,
   nsfw: false,
@@ -11,6 +28,18 @@ const App = {
     this.buildDeck();
     this.applySettings();
     this.deal();
+
+    // A browser refuses to start an AudioContext outside a user gesture, so
+    // gk-audio stays inert until someone calls init() from one — without this
+    // every GK.Sfx call no-ops on a null ctx and the app is simply silent.
+    //
+    // Not `{ once: true }` on purpose: iOS suspends the context whenever the
+    // app is backgrounded and never resumes it by itself, so a phone that has
+    // been in a pocket mid-game comes back mute. init() is idempotent and
+    // resumes a suspended context, and pointerdown is always a gesture.
+    const unlock = () => GK.Sfx.init();
+    document.addEventListener("pointerdown", unlock);
+    document.addEventListener("keydown", unlock);
 
     // Keys 1-5 spotlight, space/right deals, left goes back. Handy when the
     // phone is propped up and someone's reaching over.
@@ -33,7 +62,7 @@ const App = {
   deal() {
     this.deck.deal();
     this.chosen = -1;
-    GK.Sfx.click();
+    GK.Sfx.dealCard();
     this.render();
   },
 
@@ -43,7 +72,7 @@ const App = {
   choose(i) {
     if (!this.settings.spotlight) return;
     this.chosen = this.chosen === i ? -1 : i;
-    GK.Sfx.click();
+    if (this.chosen >= 0) GK.Sfx.spot(); else GK.Sfx.click();
     this.render();
   },
 
